@@ -1,0 +1,5 @@
+2018/11/22-14:32:34.467 5d3c Recovering log #99
+2018/11/22-14:32:34.467 5d3c Level-0 table #102: started
+2018/11/22-14:32:34.520 5d3c Level-0 table #102: 176 bytes OK
+2018/11/22-14:32:34.652 5d3c Delete type=0 #99
+2018/11/22-14:32:34.668 5d3c Delete type=3 #97
