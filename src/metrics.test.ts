@@ -2,16 +2,6 @@ import { expect } from 'chai'
 import { Metric, MetricsHandler } from './metrics'
 import LevelDb from './leveldb'
 
-const a: number = 0
-
-describe('Metrics', function () {
-  it('#get', function () {
-    it('should equal to 0', function() {
-      expect(a).to.equal(1)
-    })
-  })
-})
-
 const dbPath: string = 'db_test'
 var dbMet: MetricsHandler
   
