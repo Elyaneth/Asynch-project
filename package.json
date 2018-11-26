@@ -1,0 +1,31 @@
+{
+  "name": "src",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/ts-node src/server.ts",
+    "dev": "./node_modules/.bin/nodemon ",
+    "build": "./node_modules/.bin/tsc -p tsconfig.json",
+    "populate": "./node_modules/.bin/ts-node bin/populate.ts",
+    "test": "./node_modules/.bin/mocha -r ts-node/register src/**/*.test.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "encoding-down": "^5.0.4",
+    "level-ws": "^1.0.0",
+    "leveldown": "^4.0.1",
+    "levelup": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/levelup": "^3.1.0",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.6"
+  }
+}
