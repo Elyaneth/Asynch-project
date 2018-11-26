@@ -10,12 +10,26 @@ const dbMetrics = new MetricsHandler ("./db")
 app.use(bodyparser.json())
 app.use(bodyparser.urlencoded())
 
-app.get('/', (req: any, res: any) => {
+app.use(function (req: any, res: any, next: any) {
+  console.log(req.method + ' on ' + req.url)
+  next()
+})
+
+
+const router = express.Router()
+
+router.use(function (req: any, res: any, next: any) {
+  console.log('router: '  + req.method + ' on ' + req.url)
+  next()
+})
+
+
+router.get('/', (req: any, res: any) => {
   res.write('Hello Bob')
   res.end()
 })
 
-app.get('/metrics/:id', (req: any, res: any) => {
+router.get('/:id', (req: any, res: any) => {
   dbMetrics.get(req.params.id, (err: Error | null, result?: any) => {
     if (err) {
       throw err
@@ -24,7 +38,7 @@ app.get('/metrics/:id', (req: any, res: any) => {
   })
 })
 
-app.post('/metrics/:id', (req: any, res: any) => {
+router.post('/:id', (req: any, res: any) => {
   console.log(req.body)
   dbMetrics.save(req.params.id, req.body, (err: Error | null, result?: any) => {
     if (err) {
@@ -34,7 +48,8 @@ app.post('/metrics/:id', (req: any, res: any) => {
   })
 })
 
-app.post('/metrics/delete/:id', (req: any, res: any) => {
+//change that post into a delete thing
+router.post('/delete/:id', (req: any, res: any) => {
   console.log(req.body)
   dbMetrics.del(req.params.id, (err: Error | null, result?: any) => {
     if (err) {
@@ -42,6 +57,13 @@ app.post('/metrics/delete/:id', (req: any, res: any) => {
     }
     res.status(200).send()
   })
+})
+
+app.use('/metrics', router)
+
+app.use(function (err: Error, req: any, res: any, next: any) {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
 })
 
 app.listen(port, (err: Error) => {
