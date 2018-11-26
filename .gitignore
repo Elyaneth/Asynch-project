@@ -1,2 +1,4 @@
 db/*
 !*/.gitkeep
+node_modules
+db_test
