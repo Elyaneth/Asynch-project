@@ -1,8 +1,15 @@
 import express = require('express')
 import morgan = require('morgan')
 import bodyparser = require('body-parser')
+import session = require('express-session')
+import levelSession = require('level-session-store')
+import path = require('path')
+import { UserHandler, User } from './user'
 import { MetricsHandler } from './metrics'
 import { runInNewContext } from 'vm';
+
+
+const LevelStore = levelSession(session)
 
 const app = express()
 const port: string = process.env.PORT || '8080'
@@ -14,6 +21,103 @@ app.use(bodyparser.urlencoded())
 
 app.use(morgan('dev'))
 
+app.use(session({
+  secret: 'this is a very secret phrase',
+  store: new LevelStore('./db/sessions'),
+  resave: true,
+  saveUninitialized: true
+}))
+
+
+app.set('views', __dirname + '/views')
+app.set('view engine', 'ejs')
+
+app.use('/', express.static(path.join( __dirname, '/../node_modules/jquery/dist')))
+app.use('/', express.static(path.join( __dirname, '/../node_modules/bootstrap/dist')))
+
+
+const authCheck = function (req: any, res: any, next: any) {
+  if (req.session.loggedIn) {
+    next()
+  } else res.redirect('/login')
+}
+
+app.get('/', authCheck, (req: any, res: any) => {
+  res.render('index', { name: req.session.username })
+})
+
+//USERS
+const userRouter = express.Router()
+
+//BUG VOIR SLIDES UPDATES
+// erreur : cant set headers after they are sent
+userRouter.get('/:username', (req: any, res: any, next: any) => {
+  dbUser.get(req.params.username, (err: Error | null, result?: User) => {
+    if (result === undefined) {
+      res.status(404).send("user not found")
+    } else {
+      res.status(200).json(result)
+    }
+  })
+})
+
+userRouter.post('/', (req: any, res: any, next: any) => {
+  dbUser.get(req.body.username, (err: Error | null, result?: User) => {
+    if (err) next(err)
+    if (result !== undefined) {
+      res.status(409).send("user already exists")
+    }
+    else {
+      dbUser.save(req.body, (err: Error | null) => {
+        if (err) next(err)
+        res.status(200).send("user persisted")
+      })
+    }
+  })
+})
+
+app.use('/user', userRouter)
+
+
+//AUTH
+const Authrouter = express.Router()
+const dbUser: UserHandler = new UserHandler('./db/users')
+
+Authrouter.get('/login', function(req: any, res: any) {
+  res.render('login')
+})
+
+Authrouter.post('/login', (req: any, res: any, next: any) => {
+  dbUser.get(req.body.username, function(err: Error | null, result?: User){
+    if (err) next(err)
+
+    if (result === undefined || !result.validatePassword(req.body.username)) {
+      //ajouter message d'erreur si poss
+      res.redirect('/login')
+    } else {
+      req.session.loggedIn = true
+      req.session.user = result
+      res.redirect('/')
+    }
+  })
+})
+
+Authrouter.get('/signup', function(req: any, res: any) {
+  res.render('signup')
+})
+
+Authrouter.get('/logout', (req: any, res: any) => {
+  if(req.session.loggedIn){
+    delete req.session.loggedIn
+    delete req.session.user
+    res.redirect('/login')
+  }
+
+})
+
+app.use(Authrouter)
+
+//ROUTE
 const router = express.Router()
 
 router.use(function (req: any, res: any, next: any) {
@@ -21,12 +125,12 @@ router.use(function (req: any, res: any, next: any) {
   next()
 })
 
-
 router.get('/', (req: any, res: any) => {
   res.write('Hello Bob')
   res.end()
 })
 
+//METRICS
 router.get('/:id', (req: any, res: any, next:any) => {
   dbMetrics.get(req.params.id, (err: Error | null, result?: any) => {
     if (err) next(err)
@@ -50,7 +154,7 @@ router.delete('/:id', (req: any, res: any, next:any) => {
   })
 })
 
-app.use('/metrics', router)
+app.use('/metrics', authCheck, router)
 
 app.use(function (err: Error, req: any, res: any, next: any) {
   console.error(err.stack)
