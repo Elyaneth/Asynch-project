@@ -62,6 +62,7 @@ userRouter.get('/:username', function (req: any, res: any, next: any) {
 userRouter.post('/', (req: any, res: any, next: any) => {
   dbUser.get(req.body.username, (err: Error | null, result?: User) => {
     if (err) next(err)
+
     if (result !== undefined) {
       res.status(409).send("user already exists")
     }
@@ -74,15 +75,36 @@ userRouter.post('/', (req: any, res: any, next: any) => {
   })
 })
 
-//test pour sauvegarde
-userRouter.get('/save/:username&:password&:mail', function (req: any, res: any, next: any) {
-    var us = new User(req.params.username,req.params.password,req.params.mail)
+//SAUVERGARDER USER (test)
+userRouter.get('/save/:username&:mail&:password', function (req: any, res: any, next: any) {
+    var us = new User(req.params.username,req.params.mail,req.params.password)
 
-    dbUser.register(us, (err: Error | null) => {
+    console.log(us.username)
+    console.log(us.email)
+    console.log(us.password)
+
+    dbUser.save(us, (err: Error | null) => {
       if (err) next(err)
       res.status(200).send("user registered")
     })
+})
 
+//DELETE USER
+userRouter.delete('/:username', function (req: any, res: any, next: any) {
+
+  dbUser.delete(req.params.username, (err: Error | null) => {
+    if (err) next(err)
+    res.status(200).send("user deleted")
+  })
+})
+
+//read all the db, check for one username
+userRouter.get('/read/:username', function (req: any, res: any, next: any) {
+
+  dbUser.readall(req.params.username, (err: Error | null, result?: string) =>{
+    if (err) next(err)
+    res.status(200).send(result)
+  })
 })
 
 app.use('/user', userRouter)
@@ -137,6 +159,7 @@ router.get('/', (req: any, res: any) => {
   res.write('Hello Bob')
   res.end()
 })
+
 
 //METRICS
 router.get('/:id', (req: any, res: any, next:any) => {
