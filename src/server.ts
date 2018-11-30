@@ -6,7 +6,6 @@ import levelSession = require('level-session-store')
 import path = require('path')
 import { UserHandler, User } from './user'
 import { MetricsHandler } from './metrics'
-import { runInNewContext } from 'vm';
 
 
 const LevelStore = levelSession(session)
@@ -48,16 +47,15 @@ app.get('/', authCheck, (req: any, res: any) => {
 
 //USERS
 const userRouter = express.Router()
+const dbUser: UserHandler = new UserHandler('./db/users')
 
 //BUG VOIR SLIDES UPDATES
 // erreur : cant set headers after they are sent
-userRouter.get('/:username', (req: any, res: any, next: any) => {
-  dbUser.get(req.params.username, (err: Error | null, result?: User) => {
-    if (result === undefined) {
-      res.status(404).send("user not found")
-    } else {
-      res.status(200).json(result)
-    }
+userRouter.get('/:username', function (req: any, res: any, next: any) {
+  dbUser.get(req.params.username, function (err: Error | null, result?: User) {
+    if (err || result === undefined) {
+      //res.status(404).send("user not found")
+    } else res.status(200).json(result)
   })
 })
 
@@ -76,12 +74,22 @@ userRouter.post('/', (req: any, res: any, next: any) => {
   })
 })
 
+//test pour sauvegarde
+userRouter.get('/save/:username&:password&:mail', function (req: any, res: any, next: any) {
+    var us = new User(req.params.username,req.params.password,req.params.mail)
+
+    dbUser.register(us, (err: Error | null) => {
+      if (err) next(err)
+      res.status(200).send("user registered")
+    })
+
+})
+
 app.use('/user', userRouter)
 
 
 //AUTH
 const Authrouter = express.Router()
-const dbUser: UserHandler = new UserHandler('./db/users')
 
 Authrouter.get('/login', function(req: any, res: any) {
   res.render('login')

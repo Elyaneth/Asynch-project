@@ -16,8 +16,23 @@ export class UserHandler {
     this.db.put(`user:${user.username}`, `${user.getPassword}:${user.email}`)
   }
 
+  public register(user: User, callback: (err: Error | null) => void) {
+
+    var test = user.password
+
+    console.log(test)
+    
+    user.setPassword
+
+    console.log(test)
+
+    this.db.put(`user:${user.username}`, `${user.password}:${user.email}`)
+  }
+
+
   public delete(username: string, callback: (err: Error | null) => void) {
     // TODO
+    this.db.del(username);
   }
 
   constructor(path: string) {
@@ -30,7 +45,8 @@ export class User {
 
     public username: string
     public email: string
-    private password: string = ""
+    //HAD TO CHNAGE TO PUBLIC GETTERS NOT WORKING
+    public password: string = ""
   
     constructor(username: string, email: string, password: string, passwordHashed: boolean = false) {
       this.username = username
@@ -42,26 +58,37 @@ export class User {
     }
 
     static fromDb(username:any, value: any): User {
-        // Parse db result and return a User
         const [ password, email] = value.value.split(":")
 
         return new User(username,email,password)
     }
     
     public setPassword(toSet: string): void {
-        // Hash and set password
-        // check bcrypt
-        this.password = toSet
+      // Hash and set password
+      const bcrypt = require('bcrypt');
+      const saltRounds = 10;
+
+      var salt = bcrypt.genSaltSync(saltRounds);
+      var hash = bcrypt.hashSync(toSet, salt);
+
+      //Reading test
+      //var bob = bcrypt.compareSync("bambi", hash);
+      //console.log(bob)
+
+      this.password = toSet
     }
     
+    //useless
     public getPassword(): string {
         return this.password
     }
     
     public validatePassword(toValidate: String): boolean {
-        // return comparison with hashed password
-        //return this.password.tovalidate
-        return false
+      const bcrypt = require('bcrypt');
+
+      bcrypt.compareSync(toValidate, this.password);
+
+      return this.password === toValidate
     }
 }
   
