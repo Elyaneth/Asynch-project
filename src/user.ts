@@ -4,7 +4,7 @@ export class User {
 
     public username: string
     public email: string
-    //HAD TO CHNAGE TO PUBLIC GETTERS NOT WORKING
+    //HAD TO CHANGE TO PUBLIC GETTERS NOT WORKING
     public password: string = ""
   
     constructor(username: string, email: string, password: string, passwordHashed: boolean = false) {
@@ -16,12 +16,19 @@ export class User {
       } else this.password = password
     }
 
-    static fromDb(username:any, value: any): User {
-        const [ password, email] = value.value.split(":")
+    //given data is the value of a database object (contains pass and email)
+    //method used to create a new user with all required field (DO NOT ENCRYPT PASS TWICE)
+    static fromDb(username:any, data: any): User {
+      const [ password, email] = data.split(":")
 
-        return new User(username,email,password)
+      //console.log(username)
+      //console.log(password)
+      //console.log(email)
+
+      return new User(username,email,password, true)
     }
     
+    //encrypt given password
     public setPassword(toSet: string): void {
       // Hash and set password
       const bcrypt = require('bcrypt');
@@ -38,12 +45,17 @@ export class User {
     //    return this.password
     //}
     
+    //check if the password given (toValidate) is equal to the crypted one
     public validatePassword(toValidate: String): boolean {
       const bcrypt = require('bcrypt');
 
-      bcrypt.compareSync(toValidate, this.password);
+      var test = bcrypt.compareSync(toValidate, this.password);
 
-      return this.password === toValidate
+      console.log("test")
+      console.log(bcrypt.compareSync(toValidate, this.password))
+
+
+      return test
     }
 }
 
@@ -55,7 +67,10 @@ export class UserHandler {
     this.db.get(`user:${username}`, function (err: Error, data: any) {
       if (err) callback(err)
       if (data === undefined) callback(null, data)
-      else callback(null, User.fromDb(username, data))
+      else{
+        //console.log(data)
+        callback(null, User.fromDb(username, data))
+      } 
     })
   }
 
@@ -98,13 +113,15 @@ export class UserHandler {
             info += `${data.key} \n `
         }
         else{
+          info += `levedb success: ${data.key} key does match \n`
+          info += k+", "+ pass +", "+ mail + "\n"
+
          console.log(`levedb success: ${data.key} key does match`)
          console.log(k+", "+ pass +", "+ mail)
          info += `${data.key}, `
         }
       console.log(info)
     })
-      
   }
 
   constructor(path: string) {

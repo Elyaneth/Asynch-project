@@ -42,7 +42,8 @@ const authCheck = function (req: any, res: any, next: any) {
 }
 
 app.get('/', authCheck, (req: any, res: any) => {
-  res.render('index', { name: req.session.username })
+  console.log(req.session.user.username)
+  res.render('index', { name: req.session.user.username })
 })
 
 //USERS
@@ -98,19 +99,21 @@ userRouter.delete('/:username', function (req: any, res: any, next: any) {
   })
 })
 
-//read all the db, check for one username
+//read all the user db, check for one username
 userRouter.get('/read/:username', function (req: any, res: any, next: any) {
 
   dbUser.readall(req.params.username, (err: Error | null, result?: string) =>{
     if (err) next(err)
-    res.status(200).send(result)
+    //res.status(200).send(result)
+    console.log("data =" + result)
+    res.render('readdb', { data: result })
   })
 })
 
 app.use('/user', userRouter)
 
 
-//AUTH
+//AUTHENTICATION
 const Authrouter = express.Router()
 
 Authrouter.get('/login', function(req: any, res: any) {
@@ -120,9 +123,11 @@ Authrouter.get('/login', function(req: any, res: any) {
 Authrouter.post('/login', (req: any, res: any, next: any) => {
   dbUser.get(req.body.username, function(err: Error | null, result?: User){
     if (err) next(err)
+    //console.log(result)
+    //console.log(req.body.password)
 
-    if (result === undefined || !result.validatePassword(req.body.username)) {
-      //ajouter message d'erreur si poss
+    if (result === undefined || !result.validatePassword(req.body.password)) {
+      console.log("wrong password")
       res.redirect('/login')
     } else {
       req.session.loggedIn = true
@@ -136,13 +141,12 @@ Authrouter.get('/signup', function(req: any, res: any) {
   res.render('signup')
 })
 
-Authrouter.get('/logout', (req: any, res: any) => {
-  if(req.session.loggedIn){
+Authrouter.get('/logout', function (req: any, res: any) {
+  if (req.session.loggedIn) {
     delete req.session.loggedIn
     delete req.session.user
-    res.redirect('/login')
   }
-
+  res.redirect('/login')
 })
 
 app.use(Authrouter)
