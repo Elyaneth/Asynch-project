@@ -6,7 +6,7 @@
 
 <body class="container">
   <div class="col-md-6.col-md-offset-3">
-    <div id="form">
+    <div>
       <p>Here is what we have found in the user database:</p>
       <hr/>
       
@@ -14,10 +14,9 @@
         <td><%= data %></td>
       </tr>
 
-
       <br>
-      <button class="btn btn-success btn-block" type="submit">
-        Go back (to code)
+      <button class="btn btn-success btn-block" type="submit" onClick='document.location.href="/login"'>
+        Go back to login
       </button>
     </div>
   </div>

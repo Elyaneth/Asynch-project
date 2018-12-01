@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<head>
+</head>
+
+<body class="container">
+  <div class="col-md-6.col-md-offset-3">
+    <div>
+
+      <p>Please fill the form to create a metric:</p>
+      <hr/>
+      
+      <div id="form">
+          <form action="/metrics/save" method="post">
+            <div class="form-group">
+              <label for="form_timestamp">timestamp</label>
+              <input id="form_timestamp" type="text" name="timestamp" />
+            </div>
+            <div class="form-group">
+              <label for="form_value">value</label>
+              <input id="form_value" type="value" name="value" />
+            </div>
+
+            <button class="btn btn-primary btn-block" type="submit" value="Submit">Create a metric</button>
+          </form>
+          <hr/>
+
+          <p>Please fill the form to delete a metric:</p>
+      <hr/>
+      
+      <div id="formdelete">
+          <form action="/metrics/delete" method="post">
+            <div class="form-group">
+              <label for="form_value">value</label>
+              <input id="form_value" type="value" name="value" />
+            </div>
+
+            <button class="btn btn-primary btn-block" type="submit" value="Submit">Delete a metric</button>
+          </form>
+          <hr/>
+
+      <button class="btn btn-success btn-block" type="submit" onClick='document.location.href="/"'>
+        Go back to main page
+      </button>
+    </div>
+  </div>
+</body>
+
+</html>

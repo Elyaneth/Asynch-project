@@ -5,7 +5,7 @@ import session = require('express-session')
 import levelSession = require('level-session-store')
 import path = require('path')
 import { UserHandler, User } from './user'
-import { MetricsHandler } from './metrics'
+import { MetricsHandler, Metric } from './metrics'
 
 
 const LevelStore = levelSession(session)
@@ -42,8 +42,10 @@ const authCheck = function (req: any, res: any, next: any) {
 }
 
 app.get('/', authCheck, (req: any, res: any) => {
-  console.log(req.session.user.username)
-  res.render('index', { name: req.session.user.username })
+  //console.log(req.session.user.username)
+    var query = new Array(20)
+
+  res.render('index', { name: req.session.user.username})
 })
 
 //USERS
@@ -76,29 +78,6 @@ userRouter.post('/', (req: any, res: any, next: any) => {
   })
 })
 
-//SAUVERGARDER USER (test)
-userRouter.get('/save/:username&:mail&:password', function (req: any, res: any, next: any) {
-    var us = new User(req.params.username,req.params.mail,req.params.password)
-
-    console.log(us.username)
-    console.log(us.email)
-    console.log(us.password)
-
-    dbUser.save(us, (err: Error | null) => {
-      if (err) next(err)
-      res.status(200).send("user registered")
-    })
-})
-
-//DELETE USER
-userRouter.delete('/:username', function (req: any, res: any, next: any) {
-
-  dbUser.delete(req.params.username, (err: Error | null) => {
-    if (err) next(err)
-    res.status(200).send("user deleted")
-  })
-})
-
 //read all the user db, check for one username
 userRouter.get('/read/:username', function (req: any, res: any, next: any) {
 
@@ -123,7 +102,7 @@ Authrouter.get('/login', function(req: any, res: any) {
 Authrouter.post('/login', (req: any, res: any, next: any) => {
   dbUser.get(req.body.username, function(err: Error | null, result?: User){
     if (err) next(err)
-    //console.log(result)
+    //console.log(req.body.username)
     //console.log(req.body.password)
 
     if (result === undefined || !result.validatePassword(req.body.password)) {
@@ -137,8 +116,36 @@ Authrouter.post('/login', (req: any, res: any, next: any) => {
   })
 })
 
+//CREATE USER USING FORM
 Authrouter.get('/signup', function(req: any, res: any) {
-  res.render('signup')
+  res.render('createuser')
+})
+
+Authrouter.post('/signup', (req: any, res: any, next:any) => {
+  console.log(req.body.username)
+  console.log(req.body.password)
+  console.log(req.body.email)
+
+  var us = new User(req.body.username,req.body.email,req.body.password)
+
+  dbUser.save(us, (err: Error | null) => {
+    if (err) next(err)
+    res.status(200).send("user registered")
+  })
+
+  res.render('login')
+})
+
+//DELETE USER USING FORM
+Authrouter.post('/signup/delete', (req: any, res: any, next:any) => {
+  console.log(req.body.deleteusername)
+
+  dbUser.delete(req.body.deleteusername, (err: Error | null) => {
+    if (err) next(err)
+    res.status(200).send("user deleted")
+  })
+
+  res.render('login')
 })
 
 Authrouter.get('/logout', function (req: any, res: any) {
@@ -173,8 +180,54 @@ router.get('/:id', (req: any, res: any, next:any) => {
   })
 })
 
+router.get('/user/:id', function (req: any, res: any, next: any) {
+
+  dbMetrics.get(req.session.user.username, (err: Error | null, result?: any) =>{
+    if (err) next(err)
+    
+    var dataconcat = ""
+    result.forEach(element => {
+      dataconcat += " row - timestamp: " + element.timestamp + " value:" + element.value + "\n"
+    })
+
+    res.render('displayusermetrics', {name: req.session.user.username, data: dataconcat })
+  })
+})
+
+//CREATE METRIC USING FORM
+router.get('/save/:id', function (req: any, res: any, next: any) {
+
+  res.render('createusermetrics', {name: req.session.user.username })
+})
+
+router.post('/save', (req: any, res: any, next:any) => {
+  console.log(req.session.user.username)
+  console.log(req.body.timestamp)
+  console.log(req.body.value)
+
+  dbMetrics.registerusermetric(req.session.user.username, req.body.timestamp, req.body.value, (err: Error | null, result?: any) => {
+    if (err) next(err)
+    
+    console.log("save ok")
+    res.render('index', { name: req.session.user.username})
+  })
+})
+
+//DELETE Metric USING FORM
+//PROB DE HEADERS, ENCORE
+router.post('/delete', (req: any, res: any, next:any) => {
+  console.log(req.body.deletevalue)
+
+  dbMetrics.deletevalue(req.body.deletevalue, (err: Error | null) => {
+    if (err) next(err)
+    res.status(200).send("metric deleted")
+  })
+
+  res.render('index', { name: req.session.user.username})
+})
+
+
 router.post('/:id', (req: any, res: any, next:any) => {
-  console.log(req.body)
   dbMetrics.save(req.params.id, req.body, (err: Error | null, result?: any) => {
     if (err) next(err)
     res.status(200).send()

@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 <head>
 </head>
 
 <body class="container">
   <div class="col-md-6.col-md-offset-3">
     <div id="form">
-      <p>Please login to your account</p>
+      <p class="jumbotron">Please login to your account</p>
       <hr/>
       <form action="/login" method="post">
         <div class="form-group">
@@ -21,8 +23,9 @@
         <button class="btn btn-primary btn-block" type="submit" value="Submit">Connect</button>
       </form>
       <hr/>
+
       <button class="btn btn-success btn-block" type="submit" href="/signup" onClick='document.location.href="/signup"'>
-        Create an account
+        Create an account / delete one
       </button>
 
 

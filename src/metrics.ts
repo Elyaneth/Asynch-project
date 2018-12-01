@@ -30,9 +30,24 @@ export class MetricsHandler {
     
         stream.end()
     }
+  
+    public registerusermetric(key: string, tt: string, val: string, callback: (error: Error | null) => void) {
+      const stream = WriteStream(this.db)
 
-  public get(key: number, callback: (error: Error | null, result?: Metric[]) => void) {
+      console.log(key)
+  
+      stream.on('error', callback)
+      stream.on('close', callback)
+      
+      stream.write({ key: `metric:${key}:${tt}`, value: val })
+  
+      stream.end()
+  }
+
+  public get(key: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
+
+    console.log(key)
 
     var results: Metric[] = []
     var failure = "failure on keys:"
@@ -54,15 +69,6 @@ export class MetricsHandler {
   }
 
   public del(key: number, callback: (error: Error | null, result?: Metric[]) => void) {
-    /*this.db.del(key, function(error){
-      if(error != null){
-        console.log("there was an error");
-      }
-      else{
-        console.log("delete was successful");
-      }
-    });*/
-
     const stream = this.db.createReadStream()
 
     stream.on('error', callback)
@@ -70,6 +76,26 @@ export class MetricsHandler {
     stream.on('data', (data:any) => {
         const [ , k, timestamp] = data.key.split(":")
         if(k == key){
+          this.db.del(data.key, function(error){
+            if(error != null){
+              console.log("there was an error");
+            }
+            else{
+              console.log(`delete was successful on ${data.key}`);
+            }
+          })
+        }
+    })
+  }
+
+  public deletevalue(val: string, callback: (error: Error | null, result?: Metric[]) => void) {
+    const stream = this.db.createReadStream()
+
+    stream.on('error', callback)
+    stream.on('end', (err: Error) => {callback(null)})
+    stream.on('data', (data:any) => {
+        const k = data.value
+        if(k == val){
           this.db.del(data.key, function(error){
             if(error != null){
               console.log("there was an error");
