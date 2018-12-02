@@ -7,18 +7,10 @@ import path = require('path')
 import { UserHandler, User } from './user'
 import { MetricsHandler, Metric } from './metrics'
 
-
 const LevelStore = levelSession(session)
 
 const app = express()
 const port: string = process.env.PORT || '8080'
-
-const dbMetrics = new MetricsHandler ("./db")
-
-app.use(bodyparser.json())
-app.use(bodyparser.urlencoded())
-
-app.use(morgan('dev'))
 
 app.use(session({
   secret: 'this is a very secret phrase',
@@ -27,6 +19,10 @@ app.use(session({
   saveUninitialized: true
 }))
 
+app.use(bodyparser.json())
+app.use(bodyparser.urlencoded())
+
+app.use(morgan('dev'))
 
 app.set('views', __dirname + '/views')
 app.set('view engine', 'ejs')
@@ -34,6 +30,7 @@ app.set('view engine', 'ejs')
 app.use('/', express.static(path.join( __dirname, '/../node_modules/jquery/dist')))
 app.use('/', express.static(path.join( __dirname, '/../node_modules/bootstrap/dist')))
 
+const dbMetrics = new MetricsHandler ("./db")
 
 const authCheck = function (req: any, res: any, next: any) {
   if (req.session.loggedIn) {
@@ -41,19 +38,20 @@ const authCheck = function (req: any, res: any, next: any) {
   } else res.redirect('/login')
 }
 
+//basic get to initialize the main user page
 app.get('/', authCheck, (req: any, res: any) => {
-  //console.log(req.session.user.username)
     var query = new Array(20)
 
   res.render('index', { name: req.session.user.username})
 })
 
-//USERS
+// ----------------------------USERS---------------------------- //
+// ----------------------------USERS---------------------------- //
+
 const userRouter = express.Router()
 const dbUser: UserHandler = new UserHandler('./db/users')
 
-//BUG VOIR SLIDES UPDATES
-// erreur : cant set headers after they are sent
+
 userRouter.get('/:username', function (req: any, res: any, next: any) {
   dbUser.get(req.params.username, function (err: Error | null, result?: User) {
     if (err || result === undefined) {
@@ -92,18 +90,20 @@ userRouter.get('/read/:username', function (req: any, res: any, next: any) {
 app.use('/user', userRouter)
 
 
-//AUTHENTICATION
+// ----------------------------AUTHENTICATION---------------------------- //
+// ----------------------------AUTHENTICATION---------------------------- //
+
 const Authrouter = express.Router()
 
+//ROUTE TO LOGIN PAGE
 Authrouter.get('/login', function(req: any, res: any) {
   res.render('login')
 })
 
+//LOGIN USER USING FORM
 Authrouter.post('/login', (req: any, res: any, next: any) => {
   dbUser.get(req.body.username, function(err: Error | null, result?: User){
     if (err) next(err)
-    //console.log(req.body.username)
-    //console.log(req.body.password)
 
     if (result === undefined || !result.validatePassword(req.body.password)) {
       console.log("wrong password")
@@ -116,11 +116,12 @@ Authrouter.post('/login', (req: any, res: any, next: any) => {
   })
 })
 
-//CREATE USER USING FORM
+//ROUTE TO CREATE/DELETE USER PAGE
 Authrouter.get('/signup', function(req: any, res: any) {
   res.render('createuser')
 })
 
+//CREATE USER USING FORM
 Authrouter.post('/signup', (req: any, res: any, next:any) => {
   console.log(req.body.username)
   console.log(req.body.password)
@@ -148,6 +149,7 @@ Authrouter.post('/signup/delete', (req: any, res: any, next:any) => {
   res.render('login')
 })
 
+//LOGOUT FUNCTION
 Authrouter.get('/logout', function (req: any, res: any) {
   if (req.session.loggedIn) {
     delete req.session.loggedIn
@@ -158,7 +160,8 @@ Authrouter.get('/logout', function (req: any, res: any) {
 
 app.use(Authrouter)
 
-//ROUTE
+// ----------------------------ROUTE---------------------------- //
+// ----------------------------ROUTE---------------------------- //
 const router = express.Router()
 
 router.use(function (req: any, res: any, next: any) {
@@ -172,7 +175,10 @@ router.get('/', (req: any, res: any) => {
 })
 
 
-//METRICS
+// ----------------------------METRICS---------------------------- //
+// ----------------------------METRICS---------------------------- //
+
+//BASIC GET
 router.get('/:id', (req: any, res: any, next:any) => {
   dbMetrics.get(req.params.id, (err: Error | null, result?: any) => {
     if (err) next(err)
@@ -180,8 +186,8 @@ router.get('/:id', (req: any, res: any, next:any) => {
   })
 })
 
+//GET ALL USER METRICS
 router.get('/user/:id', function (req: any, res: any, next: any) {
-
   dbMetrics.get(req.session.user.username, (err: Error | null, result?: any) =>{
     if (err) next(err)
     
@@ -194,12 +200,13 @@ router.get('/user/:id', function (req: any, res: any, next: any) {
   })
 })
 
-//CREATE METRIC USING FORM
+//ROUTE TO THE CREATE/DELETE PAGE
 router.get('/save/:id', function (req: any, res: any, next: any) {
 
   res.render('createusermetrics', {name: req.session.user.username })
 })
 
+//CREATE METRIC USING FORM
 router.post('/save', (req: any, res: any, next:any) => {
   console.log(req.session.user.username)
   console.log(req.body.timestamp)
@@ -213,8 +220,7 @@ router.post('/save', (req: any, res: any, next:any) => {
   })
 })
 
-//DELETE Metric USING FORM
-//PROB DE HEADERS, ENCORE
+//DELETE METRIC USING FORM
 router.post('/delete', (req: any, res: any, next:any) => {
   console.log(req.body.deletevalue)
 
@@ -225,6 +231,7 @@ router.post('/delete', (req: any, res: any, next:any) => {
 
   res.render('index', { name: req.session.user.username})
 })
+
 
 
 router.post('/:id', (req: any, res: any, next:any) => {
@@ -244,6 +251,9 @@ router.delete('/:id', (req: any, res: any, next:any) => {
 
 app.use('/metrics', authCheck, router)
 
+
+
+//error function
 app.use(function (err: Error, req: any, res: any, next: any) {
   console.error(err.stack)
   res.status(500).send('Something broke!')

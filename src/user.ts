@@ -17,13 +17,9 @@ export class User {
     }
 
     //given data is the value of a database object (contains pass and email)
-    //method used to create a new user with all required field (DO NOT ENCRYPT PASS TWICE)
+    //method used to return a new user with all required field (DO NOT ENCRYPT PASSWORD TWICE)
     static fromDb(username:any, data: any): User {
       const [ password, email] = data.split(":")
-
-      //console.log(username)
-      //console.log(password)
-      //console.log(email)
 
       return new User(username,email,password, true)
     }
@@ -54,7 +50,6 @@ export class User {
       console.log("test")
       console.log(bcrypt.compareSync(toValidate, this.password))
 
-
       return test
     }
 }
@@ -63,6 +58,7 @@ export class User {
 export class UserHandler {
   public db: any
 
+  //Checks db for the username
   public get(username: string, callback: (err: Error | null, result?: User) => void) {
     this.db.get(`user:${username}`, function (err: Error, data: any) {
       if (err) callback(err)
@@ -74,10 +70,12 @@ export class UserHandler {
     })
   }
 
+  //save user into db
   public save(user: User, callback: (err: Error | null) => void) {
     this.db.put(`user:${user.username}`, `${user.password}:${user.email}`)
   }
 
+  //delete user from db
   public delete(username: string, callback: (err: Error | null) => void) {
     const stream = this.db.createReadStream()
 
@@ -98,6 +96,7 @@ export class UserHandler {
     })
   }
 
+  //reads all users in db, with one sucess 
   public readall(username: string, callback: (err: Error | null, result?: string) => void) {
     const stream = this.db.createReadStream()
 

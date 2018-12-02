@@ -18,32 +18,7 @@ export class MetricsHandler {
       this.db = LevelDb.open(dbPath)
     }
 
-    public save(key: number, metrics: Metric[], callback: (error: Error | null) => void) {
-        const stream = WriteStream(this.db)
     
-        stream.on('error', callback)
-        stream.on('close', callback)
-        
-        metrics.forEach(m => {
-          stream.write({ key: `metric:${key}:${m.timestamp}`, value: m.value })
-        })
-    
-        stream.end()
-    }
-  
-    public registerusermetric(key: string, tt: string, val: string, callback: (error: Error | null) => void) {
-      const stream = WriteStream(this.db)
-
-      console.log(key)
-  
-      stream.on('error', callback)
-      stream.on('close', callback)
-      
-      stream.write({ key: `metric:${key}:${tt}`, value: val })
-  
-      stream.end()
-  }
-
   public get(key: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
@@ -68,6 +43,35 @@ export class MetricsHandler {
     })
   }
 
+  //save a key using the metric class
+  public save(key: number, metrics: Metric[], callback: (error: Error | null) => void) {
+      const stream = WriteStream(this.db)
+  
+      stream.on('error', callback)
+      stream.on('close', callback)
+      
+      metrics.forEach(m => {
+        stream.write({ key: `metric:${key}:${m.timestamp}`, value: m.value })
+      })
+  
+       stream.end()
+  }
+  
+  //save a key without using the metric class
+  public registerusermetric(key: string, tt: string, val: string, callback: (error: Error | null) => void) {
+    const stream = WriteStream(this.db)
+
+    console.log(key)
+  
+    stream.on('error', callback)
+    stream.on('close', callback)
+    
+    stream.write({ key: `metric:${key}:${tt}`, value: val })
+
+    stream.end()
+  }
+
+  //delete a metric using its key
   public del(key: number, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
@@ -88,6 +92,7 @@ export class MetricsHandler {
     })
   }
 
+    //delete a metric using its value
   public deletevalue(val: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
