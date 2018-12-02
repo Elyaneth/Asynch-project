@@ -96,6 +96,8 @@ export class MetricsHandler {
     stream.on('data', (data:any) => {
         const k = data.value
         if(k == val){
+          console.log(data.value)
+          console.log(data.key)
           this.db.del(data.key, function(error){
             if(error != null){
               console.log("there was an error");

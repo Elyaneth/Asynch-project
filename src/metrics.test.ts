@@ -17,7 +17,7 @@ describe('Metrics', function () {
 
   describe('#get', function () {
     it('should get empty array on non existing group', function () {
-      dbMet.get(0, (err: Error | null, result?: Metric[]) => {
+      dbMet.get("yee haw", (err: Error | null, result?: Metric[]) => {
         expect(err).to.be.null
         expect(result).to.not.be.undefined
         expect(result).to.be.an('array')

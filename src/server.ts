@@ -220,7 +220,7 @@ router.post('/delete', (req: any, res: any, next:any) => {
 
   dbMetrics.deletevalue(req.body.deletevalue, (err: Error | null) => {
     if (err) next(err)
-    res.status(200).send("metric deleted")
+    //res.status(200).send("metric deleted")
   })
 
   res.render('index', { name: req.session.user.username})
