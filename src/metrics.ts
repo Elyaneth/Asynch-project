@@ -72,7 +72,7 @@ export class MetricsHandler {
   }
 
   //delete a metric using its key
-  public del(key: number, callback: (error: Error | null, result?: Metric[]) => void) {
+  public del(key: number, callback: (error: Error | null) => void) {
     const stream = this.db.createReadStream()
 
     stream.on('error', callback)
