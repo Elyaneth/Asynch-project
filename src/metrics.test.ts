@@ -61,7 +61,7 @@ describe('Metrics', function () {
 
   describe('#deletevalue', function () {
     it('should delete data', function () {
-      dbMet.deletevalue("hello", (err: Error | null) => {
+      dbMet.deletevalue("hello","nathan", (err: Error | null) => {
         expect(err).to.be.null
       })
     })

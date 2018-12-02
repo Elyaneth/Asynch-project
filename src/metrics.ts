@@ -93,14 +93,15 @@ export class MetricsHandler {
   }
 
     //delete a metric using its value
-  public deletevalue(val: string, callback: (error: Error | null, result?: Metric[]) => void) {
+  public deletevalue(val: string, user: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
     stream.on('error', callback)
     stream.on('end', (err: Error) => {callback(null)})
     stream.on('data', (data:any) => {
         const k = data.value
-        if(k == val){
+        const [ , key, timestamp] = data.key.split(":")
+        if(k == val && key == user){
           console.log(data.value)
           console.log(data.key)
           this.db.del(data.key, function(error){

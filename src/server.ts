@@ -224,7 +224,7 @@ router.post('/save', (req: any, res: any, next:any) => {
 router.post('/delete', (req: any, res: any, next:any) => {
   console.log(req.body.deletevalue)
 
-  dbMetrics.deletevalue(req.body.deletevalue, (err: Error | null) => {
+  dbMetrics.deletevalue(req.body.deletevalue, req.session.user.username, (err: Error | null) => {
     if (err) next(err)
     //res.status(200).send("metric deleted")
   })
