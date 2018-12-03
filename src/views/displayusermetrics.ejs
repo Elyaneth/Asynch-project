@@ -16,7 +16,17 @@
       <p>Here is what we have found in your database:</p>
       <hr/>
       
-      <td> <%= data %> </td>
+      <!-- <td> <%= data %> </td> -->
+
+      <% for(var i=0; i<data.length; i++) { %>
+        <tr>
+          <td><%= data[i].timestamp %></td>
+          
+          <td><%= data[i].value %></td>
+
+          <br>
+        </tr>
+        <% } %>
 
       <br>
       <button class="btn btn-success btn-block" type="submit" onClick='document.location.href="/"'>

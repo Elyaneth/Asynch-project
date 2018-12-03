@@ -25,7 +25,6 @@ export class MetricsHandler {
     console.log(key)
 
     var results: Metric[] = []
-    var failure = "failure on keys:"
 
     stream.on('error', callback)
     stream.on('end', (err: Error) => {callback(null, results)})
@@ -33,13 +32,10 @@ export class MetricsHandler {
         const [ , k, timestamp] = data.key.split(":")
         const value = data.value
         if(k != key){
-            failure += `${data.key}, `
         }
         else{
-         console.log(`levedb success: ${data.key} key does match`)
          results.push(new Metric(timestamp,value))
         }
-      console.log(failure)
     })
   }
 

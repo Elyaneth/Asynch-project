@@ -1,4 +1,5 @@
 import express = require('express')
+import https = require('https')
 import morgan = require('morgan')
 import bodyparser = require('body-parser')
 import session = require('express-session')
@@ -6,6 +7,11 @@ import levelSession = require('level-session-store')
 import path = require('path')
 import { UserHandler, User } from './user'
 import { MetricsHandler, Metric } from './metrics'
+
+/*
+require('dotenv').config()
+console.log('name: ' + "ENVNAME")¨
+*/
 
 const LevelStore = levelSession(session)
 
@@ -79,9 +85,8 @@ userRouter.post('/', (req: any, res: any, next: any) => {
 //read all the user db, check for one username
 userRouter.get('/read/:username', function (req: any, res: any, next: any) {
 
-  dbUser.readall(req.params.username, (err: Error | null, result?: string) =>{
+  dbUser.readall(req.params.username, (err: Error | null, result?: User[]) =>{
     if (err) next(err)
-    //res.status(200).send(result)
     console.log("data =" + result)
     res.render('readdb', { data: result })
   })
@@ -143,7 +148,8 @@ Authrouter.post('/signup/delete', (req: any, res: any, next:any) => {
 
   dbUser.delete(req.body.deleteusername, (err: Error | null) => {
     if (err) next(err)
-    res.status(200).send("user deleted")
+    //removed due to header issues
+    //res.status(200).send("user deleted")
   })
 
   res.render('login')
@@ -180,8 +186,9 @@ router.get('/', (req: any, res: any) => {
 
 //BASIC GET
 router.get('/:id', (req: any, res: any, next:any) => {
-  dbMetrics.get(req.params.id, (err: Error | null, result?: any) => {
+  dbMetrics.get(req.session.user.username, (err: Error | null, result?: any) => {
     if (err) next(err)
+    
     res.json(result)
   })
 })
@@ -191,18 +198,16 @@ router.get('/user/:id', function (req: any, res: any, next: any) {
   dbMetrics.get(req.session.user.username, (err: Error | null, result?: any) =>{
     if (err) next(err)
     
-    var dataconcat = ""
     result.forEach(element => {
-      dataconcat += " row - timestamp: " + element.timestamp + " value:" + element.value + "\n"
+      console.log("hello test" +element.timestamp+ " ,"+element.value)
     })
 
-    res.render('displayusermetrics', {name: req.session.user.username, data: dataconcat })
+    res.render('displayusermetrics', {name: req.session.user.username, data: result })
   })
 })
 
 //ROUTE TO THE CREATE/DELETE PAGE
 router.get('/save/:id', function (req: any, res: any, next: any) {
-
   res.render('createusermetrics', {name: req.session.user.username })
 })
 
@@ -253,7 +258,9 @@ app.use('/metrics', authCheck, router)
 
 
 
-//error function
+// ----------------------------ERROR---------------------------- //
+// ----------------------------ERROR---------------------------- //
+
 app.use(function (err: Error, req: any, res: any, next: any) {
   console.error(err.stack)
   res.status(500).send('Something broke!')

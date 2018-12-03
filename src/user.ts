@@ -5,7 +5,7 @@ export class User {
     public username: string
     public email: string
     //HAD TO CHANGE TO PUBLIC GETTERS NOT WORKING
-    public password: string = ""
+    private password: string = ""
   
     constructor(username: string, email: string, password: string, passwordHashed: boolean = false) {
       this.username = username
@@ -37,9 +37,9 @@ export class User {
     }
     
     //useless
-    //public getPassword(): string {
-    //    return this.password
-    //}
+    public getPassword(): string {
+       return this.password
+    }
     
     //check if the password given (toValidate) is equal to the crypted one
     public validatePassword(toValidate: String): boolean {
@@ -61,7 +61,8 @@ export class UserHandler {
   //Checks db for the username
   public get(username: string, callback: (err: Error | null, result?: User) => void) {
     this.db.get(`user:${username}`, function (err: Error, data: any) {
-      if (err) callback(err)
+      //removed to prevent header error
+      //if (err) callback(err)
       if (data === undefined) callback(null, data)
       else{
         //console.log(data)
@@ -72,7 +73,7 @@ export class UserHandler {
 
   //save user into db
   public save(user: User, callback: (err: Error | null) => void) {
-    this.db.put(`user:${user.username}`, `${user.password}:${user.email}`)
+    this.db.put(`user:${user.username}`, `${user.getPassword()}:${user.email}`)
   }
 
   //delete user from db
@@ -97,29 +98,23 @@ export class UserHandler {
   }
 
   //reads all users in db, with one sucess 
-  public readall(username: string, callback: (err: Error | null, result?: string) => void) {
+  public readall(username: string, callback: (err: Error | null, result?: User[]) => void) {
     const stream = this.db.createReadStream()
 
-    var info = "keys found: \n"
+    var results: User[] = []
 
     stream.on('error', callback)
-    stream.on('end', function() {callback(null, info) })
+    stream.on('end', function() {callback(null, results) })
     stream.on('data', (data:any) => {
         const [ , k] = data.key.split(":")
         const [pass, mail] = data.value.split(":")
         const value = data.value
         if(k != username){
-            info += `${data.key} \n `
+            results.push(new User(k, mail, pass, true))
         }
         else{
-          info += `levedb success: ${data.key} key does match \n`
-          info += k+", "+ pass +", "+ mail + "\n"
-
-         console.log(`levedb success: ${data.key} key does match`)
-         console.log(k+", "+ pass +", "+ mail)
-         info += `${data.key}, `
+         results.push(new User(k, mail, pass, true))
         }
-      console.log(info)
     })
   }
 

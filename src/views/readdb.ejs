@@ -13,9 +13,12 @@
       <p>Here is what we have found in the user database:</p>
       <hr/>
       
-      <tr>
-        <td><%= data %></td>
-      </tr>
+      <% for(var i=0; i<data.length; i++) { %>
+        <tr>
+          <td><%= data[i].username %></td>
+          <br>
+        </tr>
+        <% } %>
 
       <br>
       <button class="btn btn-success btn-block" type="submit" onClick='document.location.href="/login"'>
