@@ -1,7 +1,0 @@
-2018/12/04-15:12:13.831 fc2c Recovering log #18
-2018/12/04-15:12:13.831 fc2c Level-0 table #20: started
-2018/12/04-15:12:13.894 fc2c Level-0 table #20: 266 bytes OK
-2018/12/04-15:12:14.050 fc2c Delete type=0 #18
-2018/12/04-15:12:14.050 fc2c Delete type=2 #19
-2018/12/04-15:12:14.050 fc2c Delete type=3 #16
-2018/12/04-15:12:14.050 fc5c Compacting 4@0 + 0@1 files

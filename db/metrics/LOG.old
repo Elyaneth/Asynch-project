@@ -1,6 +1,0 @@
-2018/12/04-15:02:08.431 f33c Recovering log #15
-2018/12/04-15:02:08.431 f33c Level-0 table #17: started
-2018/12/04-15:02:08.620 f33c Level-0 table #17: 212 bytes OK
-2018/12/04-15:02:08.823 f33c Delete type=0 #15
-2018/12/04-15:02:08.823 f33c Delete type=3 #13
-2018/12/04-15:02:08.823 f14c Compacting 3@0 + 0@1 files
