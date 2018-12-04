@@ -9,6 +9,8 @@
 <body class="container">
   <div class="col-md-6.col-md-offset-3">
     <div>
+        
+      <h1>Please use this format for your timestamps: 2018-01-10 YYY-MM-DD</h1>
 
       <p>Please fill the form to create a metric:</p>
       <hr/>
@@ -28,7 +30,31 @@
           </form>
           <hr/>
 
-          <p>Please fill the form to delete a metric:</p>
+
+      <p>Please fill the form to update a metric:</p>
+      
+      <hr/>
+          <div id="form">
+            <form action="/metrics/update" method="post">
+              <div class="form-group">
+                <label for="form_value">old value</label>
+                <input id="form_value" type="value" name="oldvalue" />
+              </div>
+              <div class="form-group">
+                <label for="form_timestamp">new timestamp</label>
+                <input id="form_timestamp" type="text" name="updatetimestamp" />
+              </div>
+              <div class="form-group">
+                <label for="form_value">new value</label>
+                <input id="form_value" type="value" name="updatevalue" />
+              </div>
+  
+              <button class="btn btn-primary btn-block" type="submit" value="Submit">Update a metric</button>
+            </form>
+            <hr/>
+
+
+      <p>Please fill the form to delete a metric:</p>
       <hr/>
       
       <div id="formdelete">

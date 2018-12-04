@@ -2,6 +2,30 @@
 <html lang="en">
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<style>
+
+    .bar{
+      fill: steelblue;
+    }
+  
+    .bar:hover{
+      fill: brown;
+    }
+  
+    .axis {
+      font: 10px sans-serif;
+    }
+  
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+  
+</style>
 
 <body class="container">
   <div class="col-md-6.col-md-offset-3">
@@ -18,7 +42,7 @@
       </button>
 
       <button class="btn btn-success" id="show-metrics-user" onClick='document.location.href="/metrics/save/0" '>
-        Add/delete a metric
+        Add/update/delete a metric
       </button>
 
     <button class="btn btn-danger" href="/logout" onClick='document.location.href="/logout"'>
@@ -28,6 +52,9 @@
     <div id="metrics">
     </div>
     
+    <div id="chart"></div>
+
+
   </div>
 </body>
 
@@ -36,17 +63,102 @@
 
 <script>
   $('#show-metrics').click((e) => {
-    console.log("hello there")
-    e.preventDefault()
-    $.getJSON('/metrics/:id', {}, (data) => {
-      console.log(data)
+    $("#metrics").empty();
+    $("#chart").empty();
 
+  console.log("hello there")
+  var json;
+  e.preventDefault()
+  $.getJSON('/metrics/:id', {}, (data) => {
+    json = data;
+    console.log(json);      
+      //text part
       const content = data.map(d => {
         return `<p>timestamp: ${d.timestamp}, value: ${d.value}</p>`
       })
       $("#metrics").append(content.join("\n"))
-    })
   })
+
+  //chart part
+  var margin = {top: 20, right: 20, bottom: 70, left: 40},
+  width = 1000 - margin.left - margin.right,
+  height = 700 - margin.top - margin.bottom;
+
+
+  // set the ranges
+  var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+  var y = d3.scale.linear().range([height, 0]);
+
+  // define the axis
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom")
+
+
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left")
+      .ticks(10);
+
+
+  // add the SVG element
+  var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", 
+            "translate(" + margin.left + "," + margin.top + ")");
+
+
+  // load the data
+  d3.json('/metrics/:id', function(error, data) {
+
+      data.forEach(function(d) {
+          d.timestamp = d.timestamp;
+          d.value = parseInt(d.value);
+
+      });
+    
+    // scale the range of the data
+    x.domain(data.map(function(d) { return d.timestamp;}));
+    y.domain([0, d3.max(data, function(d) { return d.value;})]);
+
+    // add axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+      .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "3em")
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 5)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Value");
+
+
+    // Add bar chart
+    svg.selectAll("bar")
+        .data(data)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.timestamp); })
+        .attr("width", x.rangeBand())
+        .attr("y", function(d) { return y(d.value); })
+        .attr("height", function(d) { return height - y(d.value); });
+
+  });
+
+
+})
 </script>
 
 </html>
+

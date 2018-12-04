@@ -22,8 +22,6 @@ export class MetricsHandler {
   public get(key: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
-    console.log(key)
-
     var results: Metric[] = []
 
     stream.on('error', callback)
@@ -56,15 +54,25 @@ export class MetricsHandler {
   //save a key without using the metric class
   public registerusermetric(key: string, tt: string, val: string, callback: (error: Error | null) => void) {
     const stream = WriteStream(this.db)
-
-    console.log(key)
   
     stream.on('error', callback)
     stream.on('close', callback)
     
     stream.write({ key: `metric:${key}:${tt}`, value: val })
+    console.log(`save was successful on ${key}`);
 
     stream.end()
+  }
+  
+  //update a metric using its value
+  public updatevalue(newval: string, oldval: string, updatedtt:string, user: string, callback: (error: Error | null, result?: Metric[]) => void) {
+
+    this.deletevalue(oldval, user, (err: Error | null) => {
+      //res.status(200).send("metric deleted")
+    })
+
+    this.registerusermetric(user, updatedtt, newval, (err: Error | null, result?: any) => {
+    })
   }
 
   //delete a metric using its key
@@ -88,7 +96,7 @@ export class MetricsHandler {
     })
   }
 
-    //delete a metric using its value
+  //delete a metric using its value
   public deletevalue(val: string, user: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
@@ -98,8 +106,6 @@ export class MetricsHandler {
         const k = data.value
         const [ , key, timestamp] = data.key.split(":")
         if(k == val && key == user){
-          console.log(data.value)
-          console.log(data.key)
           this.db.del(data.key, function(error){
             if(error != null){
               console.log("there was an error");

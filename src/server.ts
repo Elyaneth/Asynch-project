@@ -87,7 +87,6 @@ userRouter.get('/read/:username', function (req: any, res: any, next: any) {
 
   dbUser.readall(req.params.username, (err: Error | null, result?: User[]) =>{
     if (err) next(err)
-    console.log("data =" + result)
     res.render('readdb', { data: result })
   })
 })
@@ -128,9 +127,6 @@ Authrouter.get('/signup', function(req: any, res: any) {
 
 //CREATE USER USING FORM
 Authrouter.post('/signup', (req: any, res: any, next:any) => {
-  console.log(req.body.username)
-  console.log(req.body.password)
-  console.log(req.body.email)
 
   var us = new User(req.body.username,req.body.email,req.body.password)
 
@@ -144,7 +140,6 @@ Authrouter.post('/signup', (req: any, res: any, next:any) => {
 
 //DELETE USER USING FORM
 Authrouter.post('/signup/delete', (req: any, res: any, next:any) => {
-  console.log(req.body.deleteusername)
 
   dbUser.delete(req.body.deleteusername, (err: Error | null) => {
     if (err) next(err)
@@ -213,9 +208,6 @@ router.get('/save/:id', function (req: any, res: any, next: any) {
 
 //CREATE METRIC USING FORM
 router.post('/save', (req: any, res: any, next:any) => {
-  console.log(req.session.user.username)
-  console.log(req.body.timestamp)
-  console.log(req.body.value)
 
   dbMetrics.registerusermetric(req.session.user.username, req.body.timestamp, req.body.value, (err: Error | null, result?: any) => {
     if (err) next(err)
@@ -225,9 +217,20 @@ router.post('/save', (req: any, res: any, next:any) => {
   })
 })
 
+//UPDATE METRIC USING FORM
+router.post('/update', (req: any, res: any, next:any) => {
+
+  dbMetrics.updatevalue(req.body.updatevalue, req.body.oldvalue, req.body.updatetimestamp, req.session.user.username, (err: Error | null) => {
+    if (err) next(err)
+
+  })
+
+  res.render('index', { name: req.session.user.username})
+
+})
+
 //DELETE METRIC USING FORM
 router.post('/delete', (req: any, res: any, next:any) => {
-  console.log(req.body.deletevalue)
 
   dbMetrics.deletevalue(req.body.deletevalue, req.session.user.username, (err: Error | null) => {
     if (err) next(err)
@@ -247,7 +250,6 @@ router.post('/:id', (req: any, res: any, next:any) => {
 })
 
 router.delete('/:id', (req: any, res: any, next:any) => {
-  console.log(req.body)
   dbMetrics.del(req.params.id, (err: Error | null, result?: any) => {
     if (err) next(err)
     res.status(200).send()
