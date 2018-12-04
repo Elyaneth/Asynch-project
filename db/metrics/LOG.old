@@ -1,6 +1,6 @@
-2018/12/04-14:50:41.854 e5e4 Recovering log #12
-2018/12/04-14:50:41.854 e5e4 Level-0 table #14: started
-2018/12/04-14:50:41.916 e5e4 Level-0 table #14: 266 bytes OK
-2018/12/04-14:50:42.055 e5e4 Delete type=0 #12
-2018/12/04-14:50:42.055 e5e4 Delete type=3 #10
-2018/12/04-14:50:42.074 e554 Moved #5 to level-1 251 bytes OK: files[ 3 1 0 0 0 0 0 ]
+2018/12/04-15:02:08.431 f33c Recovering log #15
+2018/12/04-15:02:08.431 f33c Level-0 table #17: started
+2018/12/04-15:02:08.620 f33c Level-0 table #17: 212 bytes OK
+2018/12/04-15:02:08.823 f33c Delete type=0 #15
+2018/12/04-15:02:08.823 f33c Delete type=3 #13
+2018/12/04-15:02:08.823 f14c Compacting 3@0 + 0@1 files
