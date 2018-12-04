@@ -194,7 +194,7 @@ router.get('/user/:id', function (req: any, res: any, next: any) {
     if (err) next(err)
     
     result.forEach(element => {
-      console.log("hello test" +element.timestamp+ " ,"+element.value)
+      console.log("element: " +element.timestamp+ " ,"+element.value)
     })
 
     res.render('displayusermetrics', {name: req.session.user.username, data: result })
