@@ -29,11 +29,11 @@ describe('Metrics', function () {
   describe('#save', function () {
     it('should save data', function () {
 
-      var test = Metric[1]
+      var test = new Metric("12/01/2015",1);
 
-      test.push(new Metric("12/01/2015",1));
-      
-      dbMet.save(12, test , (err: Error | null) => {
+      var array = [test]
+
+      dbMet.save(12, array , (err: Error | null) => {
         expect(err).to.be.null
       })
     })
