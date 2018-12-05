@@ -4,7 +4,6 @@ export class User {
 
     public username: string
     public email: string
-    //HAD TO CHANGE TO PUBLIC GETTERS NOT WORKING
     private password: string = ""
   
     constructor(username: string, email: string, password: string, passwordHashed: boolean = false) {
@@ -16,15 +15,16 @@ export class User {
       } else this.password = password
     }
 
-    //given data is the value of a database object (contains pass and email)
-    //method used to return a new user with all required field (DO NOT ENCRYPT PASSWORD TWICE)
+    //Method used to return a user from the db
+    //( true = PASSWORD NOT ENCRYPTED ) => password is already encrypted in DB
     static fromDb(username:any, data: any): User {
       const [ password, email] = data.split(":")
 
       return new User(username,email,password, true)
     }
     
-    //encrypt given password
+    //Encrypts given password
+    //Only to use one user creation
     public setPassword(toSet: string): void {
       // Hash and set password
       const bcrypt = require('bcrypt');
@@ -36,12 +36,13 @@ export class User {
       this.password = hash
     }
     
-    //useless
+    //Basic getter
     public getPassword(): string {
        return this.password
     }
     
-    //check if the password given (toValidate) is equal to the crypted one
+    //Checks if the password given is equal to the crypted one
+    // (password given from form, crypted password from DB)
     public validatePassword(toValidate: String): boolean {
       const bcrypt = require('bcrypt');
 
@@ -58,25 +59,27 @@ export class User {
 export class UserHandler {
   public db: any
 
-  //Checks db for the username
+  //Checks DB for the username
+  //If username is found in the DB, returns a User object (using fromDB)
   public get(username: string, callback: (err: Error | null, result?: User) => void) {
     this.db.get(`user:${username}`, function (err: Error, data: any) {
       //removed to prevent header error
       //if (err) callback(err)
       if (data === undefined) callback(null, data)
       else{
-        //console.log(data)
         callback(null, User.fromDb(username, data))
       } 
     })
   }
 
-  //save user into db
+  //Saves user into DB
+  //returns nothing
   public save(user: User, callback: (err: Error | null) => void) {
     this.db.put(`user:${user.username}`, `${user.getPassword()}:${user.email}`)
   }
 
-  //delete user from db
+  //Deletes user from DB
+  //Returns null
   public delete(username: string, callback: (err: Error | null) => void) {
     const stream = this.db.createReadStream()
 
@@ -97,7 +100,8 @@ export class UserHandler {
     })
   }
 
-  //reads all users in db, with one sucess 
+  //Reads all users in DB
+  //Mostly used for testing
   public readall(username: string, callback: (err: Error | null, result?: User[]) => void) {
     const stream = this.db.createReadStream()
 
@@ -108,13 +112,8 @@ export class UserHandler {
     stream.on('data', (data:any) => {
         const [ , k] = data.key.split(":")
         const [pass, mail] = data.value.split(":")
-        const value = data.value
-        if(k != username){
-            results.push(new User(k, mail, pass, true))
-        }
-        else{
          results.push(new User(k, mail, pass, true))
-        }
+        
     })
   }
 

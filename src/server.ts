@@ -44,7 +44,8 @@ const authCheck = function (req: any, res: any, next: any) {
   } else res.redirect('/login')
 }
 
-//basic get to initialize the main user page
+//GET
+//ROUTE TO INDEX PAGE
 app.get('/', authCheck, (req: any, res: any) => {
     var query = new Array(20)
 
@@ -57,7 +58,8 @@ app.get('/', authCheck, (req: any, res: any) => {
 const userRouter = express.Router()
 const dbUser: UserHandler = new UserHandler('./db/users')
 
-
+//GET
+//CHECK IF USER IS IN DB
 userRouter.get('/:username', function (req: any, res: any, next: any) {
   dbUser.get(req.params.username, function (err: Error | null, result?: User) {
     if (err || result === undefined) {
@@ -66,10 +68,11 @@ userRouter.get('/:username', function (req: any, res: any, next: any) {
   })
 })
 
+//POST
+//
 userRouter.post('/', (req: any, res: any, next: any) => {
   dbUser.get(req.body.username, (err: Error | null, result?: User) => {
     if (err) next(err)
-
     if (result !== undefined) {
       res.status(409).send("user already exists")
     }
@@ -82,7 +85,8 @@ userRouter.post('/', (req: any, res: any, next: any) => {
   })
 })
 
-//read all the user db, check for one username
+//GET
+//READS ALL USERS IN DB
 userRouter.get('/read/:username', function (req: any, res: any, next: any) {
 
   dbUser.readall(req.params.username, (err: Error | null, result?: User[]) =>{
@@ -99,11 +103,13 @@ app.use('/user', userRouter)
 
 const Authrouter = express.Router()
 
+//GET
 //ROUTE TO LOGIN PAGE
 Authrouter.get('/login', function(req: any, res: any) {
   res.render('login')
 })
 
+//POST
 //LOGIN USER USING FORM
 Authrouter.post('/login', (req: any, res: any, next: any) => {
   dbUser.get(req.body.username, function(err: Error | null, result?: User){
@@ -120,11 +126,13 @@ Authrouter.post('/login', (req: any, res: any, next: any) => {
   })
 })
 
+//GET
 //ROUTE TO CREATE/DELETE USER PAGE
 Authrouter.get('/signup', function(req: any, res: any) {
   res.render('createuser')
 })
 
+//POST
 //CREATE USER USING FORM
 Authrouter.post('/signup', (req: any, res: any, next:any) => {
 
@@ -138,6 +146,7 @@ Authrouter.post('/signup', (req: any, res: any, next:any) => {
   res.render('login')
 })
 
+//POST
 //DELETE USER USING FORM
 Authrouter.post('/signup/delete', (req: any, res: any, next:any) => {
 
@@ -150,7 +159,8 @@ Authrouter.post('/signup/delete', (req: any, res: any, next:any) => {
   res.render('login')
 })
 
-//LOGOUT FUNCTION
+//GET
+//LOGOUT USER, CLEAR SESSION
 Authrouter.get('/logout', function (req: any, res: any) {
   if (req.session.loggedIn) {
     delete req.session.loggedIn
@@ -171,7 +181,7 @@ router.use(function (req: any, res: any, next: any) {
 })
 
 router.get('/', (req: any, res: any) => {
-  res.write('Hello Bob')
+  res.write('Hello')
   res.end()
 })
 
@@ -179,7 +189,8 @@ router.get('/', (req: any, res: any) => {
 // ----------------------------METRICS---------------------------- //
 // ----------------------------METRICS---------------------------- //
 
-//BASIC GET
+//GET
+//GETS METRIC FROM METRICS DB
 router.get('/:id', (req: any, res: any, next:any) => {
   dbMetrics.get(req.session.user.username, (err: Error | null, result?: any) => {
     if (err) next(err)
@@ -188,7 +199,8 @@ router.get('/:id', (req: any, res: any, next:any) => {
   })
 })
 
-//GET ALL USER METRICS
+//GET
+//GET ALL THE CONNECTED USER METRICS
 router.get('/user/:id', function (req: any, res: any, next: any) {
   dbMetrics.get(req.session.user.username, (err: Error | null, result?: any) =>{
     if (err) next(err)
@@ -201,11 +213,13 @@ router.get('/user/:id', function (req: any, res: any, next: any) {
   })
 })
 
+//GET
 //ROUTE TO THE CREATE/DELETE PAGE
 router.get('/save/:id', function (req: any, res: any, next: any) {
   res.render('createusermetrics', {name: req.session.user.username })
 })
 
+//POST
 //CREATE METRIC USING FORM
 router.post('/save', (req: any, res: any, next:any) => {
 
@@ -217,6 +231,7 @@ router.post('/save', (req: any, res: any, next:any) => {
   })
 })
 
+//POST
 //UPDATE METRIC USING FORM
 router.post('/update', (req: any, res: any, next:any) => {
 
@@ -224,11 +239,10 @@ router.post('/update', (req: any, res: any, next:any) => {
     if (err) next(err)
 
   })
-
   res.render('index', { name: req.session.user.username})
-
 })
 
+//POST
 //DELETE METRIC USING FORM
 router.post('/delete', (req: any, res: any, next:any) => {
 
@@ -240,8 +254,8 @@ router.post('/delete', (req: any, res: any, next:any) => {
   res.render('index', { name: req.session.user.username})
 })
 
-
-
+//POST
+//OLD TESTING FUNCTION FOR SAVING
 router.post('/:id', (req: any, res: any, next:any) => {
   dbMetrics.save(req.params.id, req.body, (err: Error | null, result?: any) => {
     if (err) next(err)
@@ -249,6 +263,8 @@ router.post('/:id', (req: any, res: any, next:any) => {
   })
 })
 
+//DELETE
+//OLD TESTING FUNCTION FOR DELETING
 router.delete('/:id', (req: any, res: any, next:any) => {
   dbMetrics.del(req.params.id, (err: Error | null, result?: any) => {
     if (err) next(err)
@@ -260,8 +276,8 @@ app.use('/metrics', authCheck, router)
 
 
 
-// ----------------------------ERROR---------------------------- //
-// ----------------------------ERROR---------------------------- //
+// ----------------------------BASE---------------------------- //
+// ----------------------------BASE---------------------------- //
 
 app.use(function (err: Error, req: any, res: any, next: any) {
   console.error(err.stack)

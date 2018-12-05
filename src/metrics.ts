@@ -18,7 +18,8 @@ export class MetricsHandler {
       this.db = LevelDb.open(dbPath)
     }
 
-    
+  //Basic method to find a row in the db
+  //Returns a Metric object  
   public get(key: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
@@ -37,7 +38,9 @@ export class MetricsHandler {
     })
   }
 
-  //save a key using the metric class
+  
+  //Save a key using the metric class
+  //Does not return anything 
   public save(key: number, metrics: Metric[], callback: (error: Error | null) => void) {
       const stream = WriteStream(this.db)
   
@@ -51,7 +54,9 @@ export class MetricsHandler {
        stream.end()
   }
   
-  //save a key without using the metric class
+  //Save a key without using the metric class
+  //AVoids the creation of a metric object for nothing
+  //Does not return anything 
   public registerusermetric(key: string, tt: string, val: string, callback: (error: Error | null) => void) {
     const stream = WriteStream(this.db)
   
@@ -64,7 +69,10 @@ export class MetricsHandler {
     stream.end()
   }
   
-  //update a metric using its value
+  //Updates a metric using its value
+  //Deletes the old metric and builds a new one.
+  //If the user tries to update a metric that doesnt exists, it will simply create a new metric
+  //Does not return anything 
   public updatevalue(newval: string, oldval: string, updatedtt:string, user: string, callback: (error: Error | null, result?: Metric[]) => void) {
 
     this.deletevalue(oldval, user, (err: Error | null) => {
@@ -75,7 +83,8 @@ export class MetricsHandler {
     })
   }
 
-  //delete a metric using its key
+  //Deletes a metric using its key
+  //Does not return anything 
   public del(key: number, callback: (error: Error | null) => void) {
     const stream = this.db.createReadStream()
 
@@ -96,7 +105,11 @@ export class MetricsHandler {
     })
   }
 
-  //delete a metric using its value
+  //Deletes a metric using its key
+  //Does not return anything 
+  //Note: later key is used to identify the owner of the metric.
+  //so we need to to value instead
+  //checks both user & value to never delete someone elses metric
   public deletevalue(val: string, user: string, callback: (error: Error | null, result?: Metric[]) => void) {
     const stream = this.db.createReadStream()
 
