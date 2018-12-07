@@ -29,11 +29,11 @@ To access the app, open your browser and type "http://localhost/8080"
 
 None
 
-### Installing
 
 ## Versioning
 
 We use github for versionning
+s
 ## Authors
 
 Pierre-Louis Imbert
